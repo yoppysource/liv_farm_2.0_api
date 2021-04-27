@@ -3,15 +3,15 @@ const authController = require("../controllers/authController");
 const orderController = require("../controllers/orderController");
 
 const router = express.Router();
+//Admin
+// router.use(authController.restrictTo);
+router.route("/").get(orderController.getAllOrders);
 //Webhook
-router.route("/webhook").post(orderController.createOrderWhenPaid);
+router.route("/webhook").post(orderController.sendAlarmTalkWhenPaid);
 
 router.use(authController.protect);
+router.route("/").post(orderController.createOrder);
 router.route("/myOrders").get(orderController.getMyOrders);
-
-//Admin
-router.use(authController.restrictTo);
-router.route("/").get(orderController.getAllOrders);
 
 router
   .route("/:id")

@@ -16,7 +16,7 @@ const itemSchema = new mongoose.Schema({
 itemSchema.pre(/^find/, function (next) {
   this.populate({
     path: "product",
-    select: "name price thumbnailPath discountedPrice inventory",
+    // select: "name price thumbnailPath discountedPrice inventory",
   });
   next();
 });

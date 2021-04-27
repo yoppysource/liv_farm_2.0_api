@@ -19,6 +19,7 @@ const itemRouter = require("./routes/itemRoutes");
 const cartRouter = require("./routes/cartRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const appInfoRouter = require("./routes/appInfoRoutes");
+const openingHourRouter = require("./routes/openingHourRoutes");
 const app = express();
 
 app.set("view engine", "pug");
@@ -35,7 +36,7 @@ app.use(helmet());
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 // Limit requests from same IP
 const limiter = rateLimit({
-  max: 100,
+  max: 100000,
   windowMs: 60 * 60 * 1000,
   message: "Too many requests from this IP, please try again in an hour!",
 });
@@ -91,6 +92,7 @@ app.use("/api/v1/carts", cartRouter);
 app.use("/api/v1/orders", orderRouter);
 
 app.use("/api/v1/appInfo", appInfoRouter);
+app.use("/api/v1/openingHour", openingHourRouter);
 
 /* GLOBAL ERROR MANAGEMENT */
 app.all("*", (req, res, next) => {

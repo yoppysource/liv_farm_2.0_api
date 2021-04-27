@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     //transfer email to lower case
     lowercase: true,
+    unique: true,
   },
   role: {
     type: String,
@@ -30,6 +31,7 @@ const userSchema = new mongoose.Schema({
       message: "Passwords are not the same",
     },
   },
+  agreeToGetMail: Boolean,
   passwordChangedAt: Date,
   //TODO: For activate this feature, sending resetToken to user must be implemented.
   passwordResetToken: String,
@@ -89,6 +91,13 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "Cart",
   },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updatedAt: {
+    type: Date,
+  },
 });
 
 userSchema.pre(/^find/, function (next) {
@@ -119,23 +128,21 @@ userSchema.pre("save", async function (next) {
 //Klaviyo
 userSchema.pre("save", async function (next) {
   if (this.isNew) {
-    KlaviyoClient.public.identify({
-      email: this.email,
-      properties: {
-        uid: this._id,
-        // $first_name: 'Pizza',
-        // $last_name: 'Dave',
-        // favoriteFood: 'Pad thai'
-      },
-    });
-    KlaviyoClient.lists.addSubscribersToList({
-      listId: "Sync7W",
-      profiles: [
-        {
-          email: this.email,
-        },
-      ],
-    });
+    console.log(this.email);
+    // KlaviyoClient.public.identify({
+    //   email: this.email,
+    //   properties: {
+    //     uid: this._id,
+    //   },
+    // });
+    // KlaviyoClient.lists.addSubscribersToList({
+    //   listId: "Sync7W",
+    //   profiles: [
+    //     {
+    //       email: this.email,
+    //     },
+    //   ],
+    // });
   }
   next();
 });

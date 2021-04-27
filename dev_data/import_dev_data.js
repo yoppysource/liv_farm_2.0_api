@@ -2,6 +2,10 @@ const fs = require("fs");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const Product = require("../models/productModel");
+const User = require("../models/userModel");
+const Cart = require("../models/cartModel");
+const Item = require("../models/itemModel");
+const Order = require("../models/orderModel");
 
 dotenv.config({ path: "../config.env" });
 
@@ -45,6 +49,12 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Product.deleteMany();
+    await User.deleteMany();
+    await Order.deleteMany();
+    await Cart.deleteMany();
+    await Item.deleteMany();
+    // await Review.deleteMany();
+
     console.log("data successfully deleted!");
   } catch (error) {
     console.log(error);

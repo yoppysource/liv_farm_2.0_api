@@ -32,6 +32,7 @@ const productSchema = new mongoose.Schema(
     imgPath: String,
     thumbnailPath: String,
     descriptionImgPath: String,
+    detailImgPath: [String],
     sku: String,
     type: String,
     intro: String,

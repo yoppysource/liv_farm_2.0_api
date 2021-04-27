@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Coupon = require("./couponModel");
 
 const orderSchema = new mongoose.Schema(
   {
@@ -18,15 +19,41 @@ const orderSchema = new mongoose.Schema(
       enum: ["delivery", "takeOut"],
       default: "delivery",
     },
+    deliveryRequest: String,
+    coupon: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Coupon",
+    },
     scheduledDate: Date,
+    deliveryReservationMessage: String,
     payMethod: String,
     status: {
       type: Number,
       min: 0,
-      max: 4,
+      max: 3,
       default: 0,
     },
     paidAmount: Number,
+    isReviewed: {
+      type: Boolean,
+      default: false,
+    },
+    coupon: {
+      type: {
+        type: String,
+        default: "Coupon",
+        enum: ["Coupon"],
+      },
+      code: {
+        type: String,
+      },
+      category: {
+        type: String,
+        enum: ["rate", "value"],
+      },
+      amount: Number,
+      description: String,
+    },
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
@@ -50,20 +77,16 @@ const orderSchema = new mongoose.Schema(
 orderSchema.virtual("orderStatus").get(function () {
   const statusObj = {
     0: "결제 완료",
-    1: "포장 중",
-    2: "배송 중",
-    3: "전달 완료",
-    4: "환불 처리",
+    1: "배송 중",
+    2: "전달 완료",
+    3: "환불 처리",
   };
   return statusObj[this.status];
 });
 
 orderSchema.index({ cart: 1, user: 1 });
 orderSchema.pre(/^find/, function (next) {
-  this.populate({ path: "cart" }).populate({
-    path: "user",
-    select: "name email phoneNumber",
-  });
+  this.populate({ path: "cart" });
   next();
 });
 

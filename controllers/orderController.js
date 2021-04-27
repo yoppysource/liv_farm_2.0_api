@@ -51,49 +51,63 @@ const updateInventory = async (cartID) => {
   for (const item of cart.items) {
     const product = await Product.findById(item.product._id);
     //TODO: 음수일 경우 어떤식으로 처리 할 것인지
-    newInventory = product.inventory - item.quantity;
+    let newInventory = product.inventory - item.quantity;
+    if (newInventory < 0) newInventory = 0;
     await Product.findByIdAndUpdate(product.id, { inventory: newInventory });
   }
 };
-exports.createOrderWhenPaid = catchAsync(async (req, res, next) => {
+
+exports.sendAlarmTalkWhenPaid = catchAsync(async (req, res, next) => {
   const token = await getTokenFromIamPort();
   const data = await getDataFromIamPort(token, req.body.merchant_uid);
-
   console.log(data);
-  // req.user = await User.findById(data.customerUid);
-  req.user = await User.findById("60629a76d34a223ad1c73b5e");
-  const doc = await Order.create({
-    // _id: data.merchant_uid,
-    _id: "test",
-    address: {
-      address: data.buyer_addr,
-      postcode: data.buyer_postcode,
-    },
-    scheduledDate: data.customerData?.scheduledDate ?? null,
-    payMethod: data.pay_method,
-    paidAmount: data.amount,
-    user: req.user.id,
-    cart: req.user.cart,
-  });
-  if (doc) {
-    await updateInventory(req.user.cart);
-    const newCart = await Cart.create({});
-    await User.findByIdAndUpdate(req.user.id, { cart: newCart.id });
-    console.log(newCart.id);
-
-    res.status(201).json({
-      status: "success",
-      data: {
-        data: doc,
-      },
-    });
-  }
+  const customData = JSON.parse(data.custom_data);
+  console.log(data.scheduledDate);
 });
+exports.createOrder = catchAsync(async (req, res, next) => {
+  const doc = await Order.create(req.body);
+  await updateInventory(req.body.cart);
+  const newCart = await Cart.create({});
+  await User.findByIdAndUpdate(req.body.user, { cart: newCart.id });
+  //UpdateCoupon
+  if (req.body.coupon) {
+    User.update(
+      {
+        _id: req.body.user,
+        coupon: { $elemMatch: { code: req.body.coupon } },
+      },
+      { $set: { coupon: { isUsed: true } } },
+      (error, result) => {
+        if (error) {
+        }
+        console.log(result);
+      }
+    );
+  }
 
-exports.sendEmailForOrder = () => {
-  //TODO: Implement After
-};
+  res.status(201).json({
+    status: "success",
+    data: {
+      data: doc,
+    },
+  });
 
+  // const doc = await Order.create({
+  //   _id: data.merchant_uid,
+  //   // _id: "test",
+  //   address: {
+  //     address: data.buyer_addr,
+  //     postcode: data.buyer_postcode,
+  //   },
+  //   scheduledDate: data.customerData?.scheduledDate ?? null,
+  //   deliveryRequest: data.customerData?.deliveryRequest ?? null,
+
+  //   payMethod: data.pay_method,
+  //   paidAmount: data.amount,
+  //   user: data.customerData.customerId,
+  //   cart: data.customerData.cartId,
+  // });
+});
 //Client
 exports.getMyOrders = catchAsync(async (req, res, next) => {
   //find order by ID
@@ -104,7 +118,6 @@ exports.getMyOrders = catchAsync(async (req, res, next) => {
     results: docs.length,
     //when sending arrary
     data: {
-      //생략가능. key과 value변수명이 같으면 생략가능
       data: docs,
     },
   });

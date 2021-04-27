@@ -29,18 +29,26 @@ const createSendToken = (user, statusCode, res) => {
   res.status(statusCode).json({
     status: "success",
     token,
-    data: { user },
+    data: { data: user },
   });
 };
 
 exports.socialLogin = catchAsync(async (req, res, next) => {
   const { email, snsId, platform } = req.body;
   if (snsId && platform) {
+    console.log(snsId, platform);
     const user = await User.findOne({ snsId, platform });
-    if (user) return createSendToken(user, 200, res);
 
+    if (user) {
+      return createSendToken(user, 200, res);
+    }
     req.body.role = "user";
-    const newUser = await User.create(req.body);
+    let newUser = await User.create(req.body);
+    newUser = await newUser
+      .populate({
+        path: "cart",
+      })
+      .execPopulate();
 
     return createSendToken(newUser, 201, res);
   }
@@ -48,9 +56,19 @@ exports.socialLogin = catchAsync(async (req, res, next) => {
 });
 
 exports.signUp = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new AppError("Please provide email and password", 400));
+  }
   //Prevent creating adminID
   req.body.role = "user";
-  const newUser = await User.create(req.body);
+  let newUser = await User.create(req.body);
+  newUser = await newUser
+    .populate({
+      path: "cart",
+    })
+    .execPopulate();
   createSendToken(newUser, 201, res);
 });
 
@@ -82,6 +100,7 @@ exports.logout = (req, res) => {
 
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check if it exist
+
   let token;
   if (
     req.headers.authorization &&
@@ -91,7 +110,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-
+  console.log("sdsd");
   if (!token) {
     return next(
       new AppError("You are not logged in! Please log in to get access.", 401)

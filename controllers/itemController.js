@@ -34,22 +34,23 @@ exports.createItem = catchAsync(async (req, res, next) => {
   if (duplicatedItem) {
     console.log(duplicatedItem);
 
-    newQuantity = duplicatedItem.quantity + req.body.quantity;
-    console.log(duplicatedItem.quantity);
-    item = await Item.findByIdAndUpdate(
+    const newQuantity = duplicatedItem.quantity + req.body.quantity;
+    console.log(newQuantity);
+    const updatedItem = await Item.findByIdAndUpdate(
       duplicatedItem._id,
       { quantity: newQuantity },
       {
         new: true,
       }
     );
-    console.log(item);
+    console.log(updatedItem);
     return res.status(200).json({
       status: "success",
-      data: item,
+      data: updatedItem,
     });
   }
-  const item = await Item.create(req.body);
+  let item = await Item.create(req.body);
+  item = await item.populate("product").execPopulate();
 
   cart.items.push(item._id);
   await cart.save();
