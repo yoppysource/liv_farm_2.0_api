@@ -86,7 +86,10 @@ orderSchema.virtual("orderStatus").get(function () {
 
 orderSchema.index({ cart: 1, user: 1 });
 orderSchema.pre(/^find/, function (next) {
-  this.populate({ path: "cart" });
+  this.populate({ path: "cart" }).populate({
+    path: "user",
+    select: "name phoneNumber",
+  });
   next();
 });
 

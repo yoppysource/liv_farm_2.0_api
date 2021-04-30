@@ -5,7 +5,9 @@ const dotenv = require("dotenv");
 // token을 제외한 인증용 데이터는 모든 API 호출시 필수값입니다.
 // token은 토큰생성을 제외한 모든 API 호출시 필수값입니다.
 
-const getAuthData = (req, res) async => {
+const kakaoTemplateCode = "TE_2986";
+
+const getAuthData = async (req, res) => {
   req.body = {
     type: "m",
     time: 1,
@@ -14,9 +16,10 @@ const getAuthData = (req, res) async => {
   let data = await aligoapi.token(req, AuthData);
   data = JSON.parse(data);
 
-  if(data.code != 0) return next(new AppError("Fail to get Token from Aligo", 400));
-  
-  const authData =  {
+  if (data.code != 0)
+    return next(new AppError("Fail to get Token from Aligo", 400));
+
+  const authData = {
     apikey: process.env.ALIGO_API_KEY,
     userid: "futureconnect",
     token: data.token,
@@ -24,37 +27,43 @@ const getAuthData = (req, res) async => {
   return authData;
 };
 
-const alimtalkSend = (req, res) => {
-    // 알림톡 전송
-  
-    req.body = {
+exports.sendAlimtalk = (req, res) => {
+  // 알림톡 전송
 
-    senderkey: 발신프로필 키
-    tpl_code: 템플릿 코드
-    sender: 발신자 연락처
-    receiver_1: 수신자 연락처
-    subject_1: 알림톡 제목
-    message_1: 알림톡 내용
+  req.body = {
+    senderkey: process.env.ALIGO_SENDER_KEY,
+    tpl_code: "TE_2986",
+    sender: "01033388179",
+    receiver_1: req.data.buyerTel,
+    subject_1: "주문알림",
+    message_1: `[LivFarm] 주문완료안내
+    안녕하세요, ${req.data.buyerName}님. 리브팜에서 주문해주셔서 감사합니다. 배송 예정시간에 맞게 갓 수확한 채소를 신선하게 보내드리겠습니다.
+    □ 주문명 : ${req.data.name}
+    □ 배송지 : ${req.databuyer.Addr}
+    □ 배송예정일 : ${req.data.customData.scheduledDate}
+    □ 결제금액 : ${req.data.amount}원`,
+    // senddate: 예약일 // YYYYMMDDHHMMSS
+    recvname: "리브팜",
+    // button: 버튼 정보 // JSON string,
+    failover: "N", // Y or N
+    // fsubject: 실패시 대체문자 제목
+    // fmessage: 실패시 대체문자 내용
+  };
+  // req.body 요청값 예시입니다.
+  // _로 넘버링된 최대 500개의 receiver, subject, message, button, fsubject, fmessage 값을 보내실 수 있습니다
+  // failover값이 Y일때 fsubject와 fmessage값은 필수입니다.
 
-    senddate: 예약일 // YYYYMMDDHHMMSS
-    recvname: 수신자 이름
-    button: 버튼 정보 // JSON string
-    failover: 실패시 대체문자 전송기능 // Y or N
-    fsubject: 실패시 대체문자 제목
-    fmessage: 실패시 대체문자 내용
-    }
-    // req.body 요청값 예시입니다.
-    // _로 넘버링된 최대 500개의 receiver, subject, message, button, fsubject, fmessage 값을 보내실 수 있습니다
-    // failover값이 Y일때 fsubject와 fmessage값은 필수입니다.
-  
-    aligoapi.alimtalkSend(req, AuthData)
-      .then((r) => {
-        res.send(r)
-      })
-      .catch((e) => {
-        res.send(e)
-      })
-  }
+  aligoapi
+    .alimtalkSend(req, AuthData)
+    .then((r) => {
+      console.log(r);
+      // res.send(r)
+    })
+    .catch((e) => {
+      console.log(e);
+      // res.send(e)
+    });
+};
 const profileAuth = (req, res) => {
   // 플러스친구 - 인증요청
 
@@ -333,20 +342,20 @@ const kakaoCancel = (req, res) => {
     });
 };
 
-module.exports = {
-  token,
-  friendList,
-  profileAuth,
-  profileCategory,
-  profileAdd,
-  templateList,
-  templateAdd,
-  templateModify,
-  templateDel,
-  templateRequest,
-  alimtalkSend,
-  historyList,
-  historyDetail,
-  kakaoRemain,
-  kakaoCancel,
-};
+// module.exports = {
+//   token,
+//   friendList,
+//   profileAuth,
+//   profileCategory,
+//   profileAdd,
+//   templateList,
+//   templateAdd,
+//   templateModify,
+//   templateDel,
+//   templateRequest,
+//   alimtalkSend,
+//   historyList,
+//   historyDetail,
+//   kakaoRemain,
+//   kakaoCancel,
+// };

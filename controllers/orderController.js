@@ -7,6 +7,7 @@ const Product = require("../models/productModel");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const AppError = require("../utils/appError");
+const aligoApi = require("../utils/aligoApi");
 
 // Webhook이 호출되어 생성되는 POST요청의 body에는 imp_uid, merchant_uid, status속성이 포함되어있습니다.
 // imp_uid는 아임포트 주문번호, merchant_uid는 가맹점 주문번호, 그리고 status는 결제 결과를 나타냅니다.
@@ -60,9 +61,10 @@ const updateInventory = async (cartID) => {
 exports.sendAlarmTalkWhenPaid = catchAsync(async (req, res, next) => {
   const token = await getTokenFromIamPort();
   const data = await getDataFromIamPort(token, req.body.merchant_uid);
-  console.log(data);
+  req.data = JSON.parse(data);
   const customData = JSON.parse(data.custom_data);
-  console.log(data.scheduledDate);
+  req.data.customData = customData;
+  return aligoApi.sendAlimtalk(req, res);
 });
 exports.createOrder = catchAsync(async (req, res, next) => {
   const doc = await Order.create(req.body);
