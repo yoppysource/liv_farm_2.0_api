@@ -50,7 +50,7 @@ exports.sendAlimtalk = async (req, res) => {
     receiver_1: req.data.buyerTel,
     subject_1: "주문알림",
     message_1: `[LivFarm] 주문완료안내
-    안녕하세요, ${req.data.buyerName}님. 리브팜에서 주문해주셔서 감사합니다. 배송 예정시간에 맞게 갓 수확한 채소를 신선하게 보내드리겠습니다.
+    안녕하세요, ${req.data.buyer_name}님. 리브팜에서 주문해주셔서 감사합니다. 배송 예정시간에 맞게 갓 수확한 채소를 신선하게 보내드리겠습니다.
     □ 주문명 : ${req.data.name}
     □ 배송지 : ${req.data.buyer_addr}
     □ 배송예정일 : ${req.data.customData.scheduledDate}
