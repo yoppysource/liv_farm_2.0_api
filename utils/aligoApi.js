@@ -37,8 +37,7 @@ exports.sendAlimtalk = async (req, res) => {
   };
 
   let data = await aligoapi.token(req, AuthData);
-  data = JSON.parse(data);
-
+  console.log(data);
   if (data.code != 0)
     return next(new AppError("Fail to get Token from Aligo", 400));
 
