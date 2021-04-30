@@ -42,7 +42,6 @@ exports.sendAlimtalk = async (req, res) => {
     return next(new AppError("Fail to get Token from Aligo", 400));
 
   AuthData.token = data.token;
-  req.data.customData = JSON.parse(req.data.customData);
 
   req.body = {
     senderkey: process.env.ALIGO_SENDER_KEY,
