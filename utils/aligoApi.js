@@ -42,6 +42,7 @@ exports.sendAlimtalk = async (req, res) => {
     return next(new AppError("Fail to get Token from Aligo", 400));
 
   AuthData.token = data.token;
+  req.data.customData = JSON.parse(req.data.customData);
 
   req.body = {
     senderkey: process.env.ALIGO_SENDER_KEY,
@@ -52,7 +53,7 @@ exports.sendAlimtalk = async (req, res) => {
     message_1: `[LivFarm] 주문완료안내
     안녕하세요, ${req.data.buyerName}님. 리브팜에서 주문해주셔서 감사합니다. 배송 예정시간에 맞게 갓 수확한 채소를 신선하게 보내드리겠습니다.
     □ 주문명 : ${req.data.name}
-    □ 배송지 : ${req.databuyer.Addr}
+    □ 배송지 : ${req.data.buyer_addr}
     □ 배송예정일 : ${req.data.customData.scheduledDate}
     □ 결제금액 : ${req.data.amount}원`,
     // senddate: 예약일 // YYYYMMDDHHMMSS
