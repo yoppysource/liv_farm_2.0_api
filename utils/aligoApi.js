@@ -8,6 +8,7 @@ const dotenv = require("dotenv");
 const kakaoTemplateCode = "TE_2986";
 
 const getAuthData = async (req, res) => {
+  console.log("get Auth");
   req.body = {
     type: "m",
     time: 1,
@@ -27,8 +28,25 @@ const getAuthData = async (req, res) => {
   return authData;
 };
 
-exports.sendAlimtalk = (req, res) => {
+exports.sendAlimtalk = async (req, res) => {
   // 알림톡 전송
+  console.log("get Auth");
+  req.body = {
+    type: "m",
+    time: 1,
+  };
+
+  let data = await aligoapi.token(req, AuthData);
+  data = JSON.parse(data);
+
+  if (data.code != 0)
+    return next(new AppError("Fail to get Token from Aligo", 400));
+
+  const authData = {
+    apikey: process.env.ALIGO_API_KEY,
+    userid: "futureconnect",
+    token: data.token,
+  };
 
   req.body = {
     senderkey: process.env.ALIGO_SENDER_KEY,
@@ -49,12 +67,13 @@ exports.sendAlimtalk = (req, res) => {
     // fsubject: 실패시 대체문자 제목
     // fmessage: 실패시 대체문자 내용
   };
+
   // req.body 요청값 예시입니다.
   // _로 넘버링된 최대 500개의 receiver, subject, message, button, fsubject, fmessage 값을 보내실 수 있습니다
   // failover값이 Y일때 fsubject와 fmessage값은 필수입니다.
-
+  console.log(req.body);
   aligoapi
-    .alimtalkSend(req, AuthData)
+    .alimtalkSend(req, authData)
     .then((r) => {
       console.log(r);
       // res.send(r)

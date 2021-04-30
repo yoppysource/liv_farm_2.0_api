@@ -61,8 +61,10 @@ const updateInventory = async (cartID) => {
 exports.sendAlarmTalkWhenPaid = catchAsync(async (req, res, next) => {
   const token = await getTokenFromIamPort();
   const data = await getDataFromIamPort(token, req.body.merchant_uid);
+  console.log(data);
   req.data = data;
   const customData = JSON.parse(data.custom_data);
+  console.log(customData);
   req.data.customData = customData;
   return aligoApi.sendAlimtalk(req, res);
 });
