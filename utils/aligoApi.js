@@ -1,32 +1,32 @@
 const aligoapi = require("aligoapi");
 const dotenv = require("dotenv");
 
-// const AuthData =
+let AuthData = {
+  apikey: process.env.ALIGO_API_KEY,
+  userid: "futureconnect",
+  token: "",
+};
 // token을 제외한 인증용 데이터는 모든 API 호출시 필수값입니다.
 // token은 토큰생성을 제외한 모든 API 호출시 필수값입니다.
 
 const kakaoTemplateCode = "TE_2986";
 
-const getAuthData = async (req, res) => {
-  console.log("get Auth");
-  req.body = {
-    type: "m",
-    time: 1,
-  };
+// const getAuthData = async (req, res) => {
+//   console.log("get Auth");
+//   req.body = {
+//     type: "m",
+//     time: 1,
+//   };
 
-  let data = await aligoapi.token(req, AuthData);
-  data = JSON.parse(data);
+//   let data = await aligoapi.token(req, AuthData);
+//   data = JSON.parse(data);
 
-  if (data.code != 0)
-    return next(new AppError("Fail to get Token from Aligo", 400));
+//   if (data.code != 0)
+//     return next(new AppError("Fail to get Token from Aligo", 400));
 
-  const authData = {
-    apikey: process.env.ALIGO_API_KEY,
-    userid: "futureconnect",
-    token: data.token,
-  };
-  return authData;
-};
+//   const authData =
+//   return authData;
+// };
 
 exports.sendAlimtalk = async (req, res) => {
   // 알림톡 전송
@@ -42,11 +42,7 @@ exports.sendAlimtalk = async (req, res) => {
   if (data.code != 0)
     return next(new AppError("Fail to get Token from Aligo", 400));
 
-  const authData = {
-    apikey: process.env.ALIGO_API_KEY,
-    userid: "futureconnect",
-    token: data.token,
-  };
+  AuthData.token = data.token;
 
   req.body = {
     senderkey: process.env.ALIGO_SENDER_KEY,
@@ -73,7 +69,7 @@ exports.sendAlimtalk = async (req, res) => {
   // failover값이 Y일때 fsubject와 fmessage값은 필수입니다.
   console.log(req.body);
   aligoapi
-    .alimtalkSend(req, authData)
+    .alimtalkSend(req, AuthData)
     .then((r) => {
       console.log(r);
       // res.send(r)
