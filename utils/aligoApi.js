@@ -77,11 +77,11 @@ exports.sendAlimtalk = async (req, res) => {
     .alimtalkSend(req, AuthData)
     .then((r) => {
       console.log(r);
-      // res.send(r);
+      res.send(r);
     })
     .catch((e) => {
       console.log(e);
-      // res.send(e);
+      res.send(e);
     });
 };
 // const profileAuth = (req, res) => {
