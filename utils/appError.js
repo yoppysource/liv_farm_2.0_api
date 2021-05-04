@@ -1,5 +1,5 @@
 class AppError extends Error {
-  nconstructor(message, statusCode) {
+  constructor(message, statusCode) {
     //메세지 프로퍼티 error에 들어있는걸로 세팅
     super(message);
 
