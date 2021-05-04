@@ -27,7 +27,7 @@ const reviewSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Review must belong to a user."],
     },
-  },
+    userName: String,
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
