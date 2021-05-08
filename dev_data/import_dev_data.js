@@ -6,6 +6,7 @@ const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
 const Item = require("../models/itemModel");
 const Order = require("../models/orderModel");
+const Review = require("../models/reviewModel");
 
 dotenv.config({ path: "../config.env" });
 
@@ -53,7 +54,7 @@ const deleteData = async () => {
     await Order.deleteMany();
     await Cart.deleteMany();
     await Item.deleteMany();
-    // await Review.deleteMany();
+    await Review.deleteMany();
 
     console.log("data successfully deleted!");
   } catch (error) {
