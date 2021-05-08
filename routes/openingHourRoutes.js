@@ -3,7 +3,8 @@ const openingHourController = require("../controllers/openingHourController");
 const authController = require("../controllers/authController");
 
 const router = express.Router();
-router.get("/:id", openingHourController.updateOpeningHour);
+router.post("/", openingHourController.createOpeningHour);
+router.get("/:id", openingHourController.getOpeningHour);
 router.patch(
   "/:id",
   //   authController.protect,

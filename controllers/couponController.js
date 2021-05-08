@@ -4,14 +4,14 @@ const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
 const User = require("../models/userModel");
 exports.registerCoupon = catchAsync(async (req, res, next) => {
-  const coupon = await Coupon.findOne({ code: req.body.code });
+  const coupon = await Coupon.findOne({ code: req.params.code });
   if (!coupon)
     return next(new AppError("요청하신 쿠폰 번호를 찾을 수 없습니다.", 404));
   let userCoupons = req.user.coupons;
 
   let isExist = false;
   userCoupons.forEach((element) => {
-    if (element.code === req.body.code) {
+    if (element.code === req.params.code) {
       isExist = true;
     }
   });
@@ -50,19 +50,21 @@ exports.registerCoupon = catchAsync(async (req, res, next) => {
 });
 
 exports.useCoupon = catchAsync(async (req, res, next) => {
-  const data = await User.findOneAndUpdate(
-    {
-      _id: req.user.id,
-      coupons: { $elemMatch: { code: req.body.code } },
-    },
-    { $set: { "coupons.$.used": true } },
-    { new: true, runValidators: true }
-  );
+  const data = await User.findOne({
+    _id: req.user.id,
+  });
+
+  data.coupons.forEach((coupon) => {
+    if (coupon._id.toString() === req.params.id) coupon.used = true;
+  });
+  data.save();
+
+  console.log(data);
 
   res.status(200).json({
     status: "success",
     data: {
-      data: data.coupons,
+      data,
     },
   });
 });

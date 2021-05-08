@@ -5,8 +5,8 @@ const authController = require("../controllers/authController");
 const router = express.Router();
 //Client
 router.use(authController.protect);
-router.route("/registerCoupon").post(couponController.registerCoupon);
-router.route("/useCoupon").post(couponController.useCoupon);
+router.route("/registerCoupon/:code").post(couponController.registerCoupon);
+router.route("/useCoupon/:id").post(couponController.useCoupon);
 
 //Admin
 router.use(authController.restrictTo);

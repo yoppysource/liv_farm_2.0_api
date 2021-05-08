@@ -37,14 +37,14 @@ const reviewSchema = new mongoose.Schema(
 
 reviewSchema.index({ product: 1, user: 1 });
 
-reviewSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: "user",
-    select: "name",
-  });
+// reviewSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: "user",
+//     select: "name",
+//   });
 
-  next();
-});
+//   next();
+// });
 reviewSchema.statics.calcAverageRatings = async function (productId) {
   const stats = await this.aggregate([
     {

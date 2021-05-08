@@ -20,6 +20,7 @@ const cartRouter = require("./routes/cartRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const appInfoRouter = require("./routes/appInfoRoutes");
 const openingHourRouter = require("./routes/openingHourRoutes");
+const eventRouter = require("./routes/eventRoutes");
 const app = express();
 
 app.set("view engine", "pug");
@@ -93,6 +94,8 @@ app.use("/api/v1/orders", orderRouter);
 
 app.use("/api/v1/appInfo", appInfoRouter);
 app.use("/api/v1/openingHour", openingHourRouter);
+
+app.use("/api/v1/events", eventRouter);
 
 /* GLOBAL ERROR MANAGEMENT */
 app.all("*", (req, res, next) => {
