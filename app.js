@@ -54,13 +54,13 @@ app.use(
 
 //Allow Cross-Origin Resource Sharing
 //TODO: For depolying it should be managed with whitelist
-if (process.env.NODE_ENV === "development")
-  app.use(
-    cors({
-      origin: true,
-      credentials: true,
-    })
-  );
+// if (process.env.NODE_ENV === "development")
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 
 //Prevent malicious query injection
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
