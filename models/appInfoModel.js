@@ -7,6 +7,7 @@ const appInfoSchema = new mongoose.Schema({
   },
   version: String,
   inMaintenance: Boolean,
+  streamingTag: String,
 });
 
 const AppInfo = mongoose.model("appInfo", appInfoSchema);

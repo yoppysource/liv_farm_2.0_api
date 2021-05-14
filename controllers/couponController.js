@@ -24,6 +24,7 @@ exports.registerCoupon = catchAsync(async (req, res, next) => {
     category: coupon.category,
     amount: coupon.amount,
     expireDate: coupon.expireDate,
+    description: coupon.description,
   };
 
   //register to User
@@ -36,10 +37,11 @@ exports.registerCoupon = catchAsync(async (req, res, next) => {
   );
 
   //If the coupon has field for limit, add -1 the field.
-  if (coupon.limit)
+  if (coupon.limit) {
     await Coupon.findByIdAndUpdate(coupon.id, {
       limit: coupon.limit - 1 < 0 ? 0 : coupon.limit - 1,
     });
+  }
 
   res.status(200).json({
     status: "success",

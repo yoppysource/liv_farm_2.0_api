@@ -19,8 +19,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     );
   }
 
-  req.body.role = "user";
-
   const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
     runValidators: true,

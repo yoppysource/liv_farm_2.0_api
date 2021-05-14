@@ -121,31 +121,39 @@ userSchema.pre("save", async function (next) {
     // When user sign in the cart should be created.
     const doc = await Cart.create({});
     this.cart = doc._id;
+    this.coupons.push({
+      code: "WELCOME",
+      used: false,
+      category: "value",
+      amount: 10000,
+      expireDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+      description: "가입 환영 쿠폰입니다.",
+    });
   }
   next();
 });
 
-//Klaviyo
-userSchema.pre("save", async function (next) {
-  if (this.isNew) {
-    console.log(this.email);
-    // KlaviyoClient.public.identify({
-    //   email: this.email,
-    //   properties: {
-    //     uid: this._id,
-    //   },
-    // });
-    // KlaviyoClient.lists.addSubscribersToList({
-    //   listId: "Sync7W",
-    //   profiles: [
-    //     {
-    //       email: this.email,
-    //     },
-    //   ],
-    // });
-  }
-  next();
-});
+// //Klaviyo
+// userSchema.pre("save", async function (next) {
+//   if (this.isNew) {
+//     console.log(this.email);
+//     // KlaviyoClient.public.identify({
+//     //   email: this.email,
+//     //   properties: {
+//     //     uid: this._id,
+//     //   },
+//     // });
+//     // KlaviyoClient.lists.addSubscribersToList({
+//     //   listId: "Sync7W",
+//     //   profiles: [
+//     //     {
+//     //       email: this.email,
+//     //     },
+//     //   ],
+//     // });
+//   }
+//   next();
+// });
 
 //This method for if we use id/password to login.
 userSchema.methods.correctPassword = async function (

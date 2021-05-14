@@ -20,10 +20,6 @@ const orderSchema = new mongoose.Schema(
       default: "delivery",
     },
     deliveryRequest: String,
-    coupon: {
-      type: mongoose.Schema.ObjectId,
-      ref: "Coupon",
-    },
     scheduledDate: Date,
     deliveryReservationMessage: String,
     payMethod: String,
