@@ -74,21 +74,22 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   const newCart = await Cart.create({});
   await User.findByIdAndUpdate(req.body.user, { cart: newCart.id });
   //UpdateCoupon
-  if (req.body.coupon) {
-    await User.update(
-      {
-        _id: req.body.user._id,
-        coupon: { $elemMatch: { _id: req.body.coupon._id } },
-      },
-      { $set: { coupon: { isUsed: true } } },
-      (error, result) => {
-        if (error) {
-          return next(new Error("쿠폰 업데이트에 실패하였습니다"));
-        }
-        console.log(result);
-      }
-    );
-  }
+  // if (req.body.coupon) {
+  //   await User.update(
+  //     {
+  //       _id: req.body.user._id,
+  //       coupon: { $elemMatch: { _id: req.body.coupon._id } },
+  //     },
+  //     { $set: { coupon: { isUsed: true } } },
+  //     (error, result) => {
+  //       if (error) {
+  //             return next(new Error("쿠폰 업데이트에 실패하였습니다"));
+  //       }
+  //       console.log(result);
+
+  //     }
+  //   );
+  // }
 
   res.status(201).json({
     status: "success",
