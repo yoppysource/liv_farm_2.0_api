@@ -9,7 +9,7 @@ router.use("/:productId/reviews", reviewRouter);
 
 router
   .route("/")
-  .get(productController.getAllProducts)
+  .get(authController.identifyingRole, productController.getAllProducts)
   .post(
     authController.protect,
     authController.restrictTo,

@@ -5,6 +5,10 @@ const slugify = require("slugify");
 const productSchema = new mongoose.Schema(
   {
     category: Number,
+    rank: {
+      type: Number,
+      default: 100,
+    },
     name: {
       type: String,
       required: [true, "Product must have a name"],
@@ -19,6 +23,10 @@ const productSchema = new mongoose.Schema(
     },
     slug: String,
     price: Number,
+    hidden: {
+      type: Boolean,
+      default: false,
+    },
     discountedPrice: {
       type: Number,
       default: this.price,
@@ -57,12 +65,28 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    isOnShelf: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
+productSchema.pre(/^find/, function (next) {
+  //thid points to the current query(find)
+  this.find().sort("-isOnShelf").sort("rank");
+  console.log("call find");
+  next();
+});
+// productSchema.virtual("isOnShelf").get(function () {
+//   if (!this.inventory || this.inventory <= 0) {
+//     return false;
+//   }
+//   return true;
+// });
 //Indexing for price, ratingsAverage
 productSchema.index({
   price: 1,
@@ -77,6 +101,26 @@ productSchema.virtual("reviews", {
   foreignField: "product",
   localField: "_id",
 });
+//Update isOnShelf
+productSchema.post(/^findOneAnd/, async (document) => {
+  if (document) {
+    if (!document.inventory || document.inventory <= 0) {
+      document.isOnShelf = false;
+    } else {
+      document.isOnShelf = true;
+    }
+    document.save();
+  }
+  //doc은 어쩌피 delete나 update나 둘다 리턴된다.
+});
+// productSchema.pre(/^update/, function (next) {
+//   if (!this.inventory || this.inventory <= 0) {
+//     this.isOnShelf = false;
+//   } else {
+//     this.isOnShelf = true;
+//   }
+//   next();
+// });
 
 //Save slug column when the document are created in order to use to make web-site url.
 productSchema.pre("save", function (next) {

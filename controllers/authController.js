@@ -136,6 +136,39 @@ exports.protect = catchAsync(async (req, res, next) => {
   res.locals.user = currentUser;
   next();
 });
+
+exports.identifyingRole = catchAsync(async (req, res, next) => {
+  // 1) Getting token and check if it exist
+
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  if (!token) {
+    return next();
+  }
+  // 2) verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  // { id: '602d09736cbf8a6830b9d364', iat: 1613617237, exp: 1621393237 }
+  // 3) check if user still exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next();
+  }
+  // 4) check if user changed password after the token was issued
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next();
+  }
+  //grant access to protected route
+  req.user = currentUser;
+  res.locals.user = currentUser;
+  next();
+});
 //Only for rendered pages, no errors!
 exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {

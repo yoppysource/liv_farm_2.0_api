@@ -67,6 +67,9 @@ exports.getAll = (Model) =>
     // To allow for nested GET reviews on tour (hack)
     let filter = {};
     if (req.params.productId) filter = { id: req.params.productId };
+    if (!req.user || req.user.role !== "admin") {
+      filter = { hidden: { $ne: true } };
+    }
 
     const features = new APIFeatures(Model.find(filter), req.query)
       .fillter()
