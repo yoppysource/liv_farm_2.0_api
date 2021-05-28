@@ -31,7 +31,10 @@ const userSchema = new mongoose.Schema({
       message: "Passwords are not the same",
     },
   },
-  agreeToGetMail: Boolean,
+  agreeToGetMail: {
+    type: Boolean,
+    default: false,
+  },
   passwordChangedAt: Date,
   //TODO: For activate this feature, sending resetToken to user must be implemented.
   passwordResetToken: String,
@@ -133,27 +136,55 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// //Klaviyo
-// userSchema.pre("save", async function (next) {
-//   if (this.isNew) {
-//     console.log(this.email);
-//     // KlaviyoClient.public.identify({
-//     //   email: this.email,
-//     //   properties: {
-//     //     uid: this._id,
-//     //   },
-//     // });
-//     // KlaviyoClient.lists.addSubscribersToList({
-//     //   listId: "Sync7W",
-//     //   profiles: [
-//     //     {
-//     //       email: this.email,
-//     //     },
-//     //   ],
-//     // });
-//   }
-//   next();
-// });
+//Klaviyo
+userSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    KlaviyoClient.public.identify({
+      email: this.email,
+    });
+    KlaviyoClient.lists.addSubscribersToList({
+      listId: "VXwYU7",
+      profiles: [
+        {
+          email: this.email,
+          properties: {
+            uid: this._id,
+          },
+        },
+      ],
+    });
+  }
+  if (this.agreeToGetMail === true) {
+    KlaviyoClient.lists.addSubscribersToList({
+      listId: "Y6A9SE",
+      profiles: [
+        {
+          email: this.email,
+          properties: {
+            uid: this._id,
+          },
+        },
+      ],
+    });
+  }
+  next();
+});
+
+userSchema.post(/^findOneAnd/, async (document) => {
+  if (document.agreeToGetMail === true) {
+    KlaviyoClient.lists.addSubscribersToList({
+      listId: "Y6A9SE",
+      profiles: [
+        {
+          email: document.email,
+          properties: {
+            uid: this._id,
+          },
+        },
+      ],
+    });
+  }
+});
 
 //This method for if we use id/password to login.
 userSchema.methods.correctPassword = async function (

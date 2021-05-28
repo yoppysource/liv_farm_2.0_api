@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Coupon = require("./couponModel");
+const User = require("./userModel");
 
 const orderSchema = new mongoose.Schema(
   {
@@ -53,7 +54,7 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
-      required: [true, "Order mush belong to User"],
+      required: [true, "주문은 반드시 사용자가 존재해야합니다."],
     },
     createdAt: {
       type: Date,
@@ -87,6 +88,22 @@ orderSchema.pre(/^find/, function (next) {
     select: "name phoneNumber",
   });
   next();
+});
+
+orderSchema.post("save", async function (document) {
+  const user = await User.findById(document.user);
+  KlaviyoClient.lists.addSubscribersToList({
+    listId: "YuiFvt",
+    profiles: [
+      {
+        email: user.email,
+        properties: {
+          uid: user._id,
+          phone_number: user.phone_number,
+        },
+      },
+    ],
+  });
 });
 
 const Order = mongoose.model("Order", orderSchema);
