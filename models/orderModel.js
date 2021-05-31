@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
-const Coupon = require("./couponModel");
-const User = require("./userModel");
+const mongoose = require('mongoose');
+const Coupon = require('./couponModel');
+const User = require('./userModel');
+const KlaviyoClient = require('../utils/email');
 
 const orderSchema = new mongoose.Schema(
   {
@@ -8,8 +9,8 @@ const orderSchema = new mongoose.Schema(
     address: {
       type: {
         type: String,
-        default: "Address",
-        enum: ["Address"],
+        default: 'Address',
+        enum: ['Address'],
       },
       address: String,
       addressDetail: String,
@@ -17,8 +18,8 @@ const orderSchema = new mongoose.Schema(
     },
     option: {
       type: String,
-      enum: ["delivery", "takeOut"],
-      default: "delivery",
+      enum: ['delivery', 'takeOut'],
+      default: 'delivery',
     },
     deliveryRequest: String,
     scheduledDate: Date,
@@ -38,23 +39,23 @@ const orderSchema = new mongoose.Schema(
     coupon: {
       type: {
         type: String,
-        default: "Coupon",
-        enum: ["Coupon"],
+        default: 'Coupon',
+        enum: ['Coupon'],
       },
       code: {
         type: String,
       },
       category: {
         type: String,
-        enum: ["rate", "value"],
+        enum: ['rate', 'value'],
       },
       amount: Number,
       description: String,
     },
     user: {
       type: mongoose.Schema.ObjectId,
-      ref: "User",
-      required: [true, "주문은 반드시 사용자가 존재해야합니다."],
+      ref: 'User',
+      required: [true, '주문은 반드시 사용자가 존재해야합니다.'],
     },
     createdAt: {
       type: Date,
@@ -62,7 +63,7 @@ const orderSchema = new mongoose.Schema(
     },
     cart: {
       type: mongoose.Schema.ObjectId,
-      ref: "Cart",
+      ref: 'Cart',
     },
   },
   {
@@ -71,29 +72,29 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-orderSchema.virtual("orderStatus").get(function () {
+orderSchema.virtual('orderStatus').get(function () {
   const statusObj = {
-    0: "결제 완료",
-    1: "배송 중",
-    2: "전달 완료",
-    3: "환불 처리",
+    0: '결제 완료',
+    1: '배송 중',
+    2: '전달 완료',
+    3: '환불 처리',
   };
   return statusObj[this.status];
 });
 
 orderSchema.index({ cart: 1, user: 1 });
 orderSchema.pre(/^find/, function (next) {
-  this.populate({ path: "cart" }).populate({
-    path: "user",
-    select: "name phoneNumber",
+  this.populate({ path: 'cart' }).populate({
+    path: 'user',
+    select: 'name phoneNumber',
   });
   next();
 });
 
-orderSchema.post("save", async function (document) {
+orderSchema.post('save', async function (document) {
   const user = await User.findById(document.user);
   KlaviyoClient.lists.addSubscribersToList({
-    listId: "YuiFvt",
+    listId: 'YuiFvt',
     profiles: [
       {
         email: user.email,
@@ -106,6 +107,6 @@ orderSchema.post("save", async function (document) {
   });
 });
 
-const Order = mongoose.model("Order", orderSchema);
+const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;
