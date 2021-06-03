@@ -93,18 +93,22 @@ orderSchema.pre(/^find/, function (next) {
 
 orderSchema.post('save', async function (document) {
   const user = await User.findById(document.user);
-  KlaviyoClient.lists.addSubscribersToList({
-    listId: 'YuiFvt',
-    profiles: [
-      {
-        email: user.email,
-        properties: {
-          uid: user._id,
-          phone_number: user.phone_number,
+  try {
+    KlaviyoClient.lists.addSubscribersToList({
+      listId: 'YuiFvt',
+      profiles: [
+        {
+          email: user.email,
+          properties: {
+            uid: user._id,
+            phone_number: user.phone_number,
+          },
         },
-      },
-    ],
-  });
+      ],
+    });
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 const Order = mongoose.model('Order', orderSchema);

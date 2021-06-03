@@ -1,8 +1,8 @@
-const crypto = require("crypto");
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const Cart = require("./cartModel");
-const KlaviyoClient = require("../utils/email");
+const crypto = require('crypto');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const Cart = require('./cartModel');
+const KlaviyoClient = require('../utils/email');
 
 const userSchema = new mongoose.Schema({
   //AUTH
@@ -14,8 +14,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["user", "admin"],
-    default: "user",
+    enum: ['user', 'admin'],
+    default: 'user',
   },
   password: {
     type: String,
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
       validator: function (el) {
         return el === this.password;
       },
-      message: "Passwords are not the same",
+      message: 'Passwords are not the same',
     },
   },
   agreeToGetMail: {
@@ -42,14 +42,14 @@ const userSchema = new mongoose.Schema({
   snsId: String,
   platform: {
     type: String,
-    enum: ["kakao", "apple", "facebook", "google"],
+    enum: ['kakao', 'apple', 'facebook', 'google'],
   },
   //DATA
   name: { type: String },
   birthday: Date,
   gender: {
     type: String,
-    enum: ["male", "female"],
+    enum: ['male', 'female'],
   },
   phoneNumber: String,
   //Address might be more than one.
@@ -57,8 +57,8 @@ const userSchema = new mongoose.Schema({
     {
       type: {
         type: String,
-        default: "Address",
-        enum: ["Address"],
+        default: 'Address',
+        enum: ['Address'],
       },
       address: String,
       addressDetail: String,
@@ -70,8 +70,8 @@ const userSchema = new mongoose.Schema({
     {
       type: {
         type: String,
-        default: "Coupon",
-        enum: ["Coupon"],
+        default: 'Coupon',
+        enum: ['Coupon'],
       },
       code: {
         type: String,
@@ -79,7 +79,7 @@ const userSchema = new mongoose.Schema({
       used: Boolean,
       category: {
         type: String,
-        enum: ["rate", "value"],
+        enum: ['rate', 'value'],
       },
       amount: Number,
       expireDate: Date,
@@ -92,7 +92,7 @@ const userSchema = new mongoose.Schema({
   },
   cart: {
     type: mongoose.Schema.ObjectId,
-    ref: "Cart",
+    ref: 'Cart',
   },
   createdAt: {
     type: Date,
@@ -105,75 +105,81 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre(/^find/, function (next) {
   this.populate({
-    path: "cart",
+    path: 'cart',
   });
   next();
 });
 
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
   if (this.snsId) return next();
   //only run this function if password was actually modified
-  if (!this.isModified("password")) return next();
+  if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
   next();
 });
 
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
   if (this.isNew) {
     // When user sign in the cart should be created.
     const doc = await Cart.create({});
     this.cart = doc._id;
     this.coupons.push({
-      code: "WELCOME",
+      code: 'WELCOME',
       used: false,
-      category: "value",
+      category: 'value',
       amount: 10000,
       expireDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
-      description: "가입 환영 쿠폰입니다.",
+      description: '가입 환영 쿠폰입니다.',
     });
   }
   next();
 });
 
 //Klaviyo
-userSchema.pre("save", async function (next) {
-  if (this.isNew) {
-    KlaviyoClient.public.identify({
-      email: this.email,
-    });
-    KlaviyoClient.lists.addSubscribersToList({
-      listId: "VXwYU7",
-      profiles: [
-        {
-          email: this.email,
-          properties: {
-            uid: this._id,
+userSchema.pre('save', async function (next) {
+  try {
+    if (this.isNew) {
+      KlaviyoClient.public.identify({
+        email: this.email,
+      });
+      KlaviyoClient.lists.addSubscribersToList({
+        listId: 'VXwYU7',
+        profiles: [
+          {
+            email: this.email,
+            properties: {
+              uid: this._id,
+            },
           },
-        },
-      ],
-    });
-  }
-  if (this.agreeToGetMail === true) {
-    KlaviyoClient.lists.addSubscribersToList({
-      listId: "Y6A9SE",
-      profiles: [
-        {
-          email: this.email,
-          properties: {
-            uid: this._id,
+        ],
+      });
+    }
+    if (this.agreeToGetMail === true) {
+      KlaviyoClient.lists.addSubscribersToList({
+        listId: 'Y6A9SE',
+        profiles: [
+          {
+            email: this.email,
+            properties: {
+              uid: this._id,
+            },
           },
-        },
-      ],
-    });
+        ],
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    next();
   }
+
   next();
 });
 
 userSchema.post(/^findOneAnd/, async (document) => {
   if (document.agreeToGetMail === true) {
     KlaviyoClient.lists.addSubscribersToList({
-      listId: "Y6A9SE",
+      listId: 'Y6A9SE',
       profiles: [
         {
           email: document.email,
@@ -206,11 +212,11 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
 userSchema.methods.createPasswordResetToken = function () {
-  const resetToken = crypto.randomBytes(32).toString("hex");
+  const resetToken = crypto.randomBytes(32).toString('hex');
   this.passwordResetToken = crypto
-    .createHash("sha256")
+    .createHash('sha256')
     .update(resetToken)
-    .digest("hex");
+    .digest('hex');
 
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   console.log({ resetToken }, this.passwordResetToken);
@@ -218,6 +224,6 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;
